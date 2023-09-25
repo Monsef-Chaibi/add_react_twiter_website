@@ -1,0 +1,3 @@
+[06-Sep-2023 22:13:00 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/xhd1u84ysv1w/public_html/my.wajdi/requests.php:115) in /home/xhd1u84ysv1w/public_html/my.wajdi/requests.php on line 151
+[21-Sep-2023 09:46:27 UTC] PHP Notice:  Undefined index: Wallet in /home/tlosa9zew2kc/public_html/tolien/process_charge.php on line 33
+[21-Sep-2023 09:49:19 UTC] PHP Notice:  Undefined index: Wallet in /home/tlosa9zew2kc/public_html/tolien/process_charge.php on line 33
