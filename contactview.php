@@ -7,7 +7,7 @@
 
         $connect = new PDO("mysql:host=localhost;dbname=souqdev_wajdi", "souqdev_wajdi", "wajdiwajdi");
         $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $connect->prepare("SELECT DISTINCT name , type  ,id ,user_to,user_from FROM contact");
+        $stmt = $connect->prepare("SELECT * FROM contact where user_from <> 'admin' group by name ");
         $stmt->execute();
         $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }

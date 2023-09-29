@@ -24,7 +24,7 @@ try {
 }
 
 // get user
-$stmt = $connect->prepare("SELECT id, status, Wallet FROM users WHERE username = :username LIMIT 1");
+$stmt = $connect->prepare("SELECT id, status, Wallet , show_message FROM users WHERE username = :username LIMIT 1");
 $stmt->bindParam(":username", $user, PDO::PARAM_STR);
 $stmt->execute();
 $user_data = $stmt->fetchObject();
@@ -32,6 +32,7 @@ if ($user_data) {
     $user_id = $user_data->id;
     $log_status = $user_data->status;
     $wallet_balance = $user_data->Wallet;
+    $show_message = $user_data->show_message;
 } else {
     session_unset();
     session_destroy();
@@ -50,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
     $price_per_unit = 30; // قيمة السعر لكل وحدة
     $total_price = $quantity * $price_per_unit;
 
-    if ($total_price <= $wallet_balance) {
+    if ($total_price < $wallet_balance) {
         // إذا كان رصيد المستخدم كافيًا للدفع
         // خصم المبلغ من رصيد المستخدم
         $new_wallet_balance = $wallet_balance - $total_price;
@@ -71,9 +72,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
 */
         // عرض رسالة نجاح للمستخدم
         echo "<div class='message' style='color: green;'>تمت عملية الشراء بنجاح.</div>";
-    } else {
-        // إذا كان رصيد المستخدم غير كافي للدفع
-        echo "<div class='message' style='color: red;'>رصيدك غير كافي لشراء هذه الكمية.</div>";
     }
 }
 ?>
@@ -95,6 +93,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
     <link rel="stylesheet" href="css/ewatyle.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="icon" href="images/8149884-48bfb943.png">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css"/>
+    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
     <style>
         * {
             outline: none !important;
@@ -156,6 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
             border-radius: 5px;
             cursor: pointer;
         }
+        
     </style>
 
 </head>
@@ -223,21 +225,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
 
 
     <?php
-    if ($log_status == "user" && $wallet_balance == 0) {
-        echo '
-    <div id="popup-container">
-    <div id="popup">
-        <h2>ملاحظة</h2>
-        <p>لا يوجد لديك رصيد</p>
-        <a href="welat.php"><button>محفظتي</button></a>
-        <a href="alart.php"><button>شحن المحفظة</button></a>
-        
-        <a  href="?logout">
-        <button id="close-button">تسجيل الخروج</button>
-        </a>
-    </div>
-</div>
-    ';
+    if ($log_status == "user" && $wallet_balance < 0.3) {
+                    echo '
+                <div id="popup-container">
+                <div id="popup">
+                    <h2>ملاحظة</h2>
+                    <img src="images/alerte.png" style="width:80px;"/>
+                    <p style="margin-top:10px;"> لا يوجد لديك رصيد يمكنك الانتقال الى</p>
+                    <a href="welat.php"><button>محفظتي</button></a>
+                    <a href="alart.php"><button>شحن المحفظة</button></a>
+                    <a href="contactuser.php"><button>الدعم</button></a>
+                    <a  href="?logout">
+                    <button id="close-button">تسجيل الخروج</button>
+                    </a>
+                </div>
+            </div>
+                ';
     }
     ?>
 
@@ -287,7 +290,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
                 </div>
                 <div class="wrap-input100">
   <span class="label-input100">الكمية المطلوبة</span>
-  <input class="input100" type="number" name="quantity" placeholder="الكمية المطلوبة" id="quantityInput">
+  <input class="input100" type="number" value="" name="quantity" onchange="calculatePrice()" placeholder="الكمية المطلوبة" id="quantityInput">
 </div>
 <div class="wrap-input100">
   <span class="label-input100">السعر</span>
@@ -310,7 +313,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
     width: 100%;
 ">
                         <div class="contact100-form-bgbtn"></div>
-                        <button name="submit" type="submit" class="contact100-form-btn w-100" id="fastReplayButton">
+                        <button name="submit" type="submit"  class="contact100-form-btn w-100" id="fastReplayButton">
                             أرسل (خصم من الرصيد)
                         </button>
 
@@ -322,6 +325,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
 
 
         <script>
+     
             document.addEventListener("DOMContentLoaded", function () {
                 const form = document.querySelector(".contact100-form");
 
@@ -375,10 +379,7 @@ const balanceInput = document.getElementById('balanceInput');
 function calculatePrice() {
   // تأكد من أن المستخدم أدخل قيمة عددية صالحة
   const quantity = parseInt(quantityInput.value, 10);
-  if (isNaN(quantity)) {
-    alert('يرجى إدخال قيمة عددية صالحة لحجم الطلب.');
-    return;
-  }
+
 
   // احتساب السعر بناءً على الكمية المدخلة
   const price = (quantity / 10) * 0.30;
@@ -395,8 +396,24 @@ function calculatePrice() {
 
   // التحقق من الرصيد الجديد وعرض رسالة تنبيه إذا كان سالبًا
   if (newBalance < 0) {
-    alert('الرصيد الحالي غير كافٍ لهذا الطلب.');
+      document.getElementById('quantityInput').value=0;
+      Swal.fire({
+            title: 'رصيدك غير كافي لشراء هذه الكمية',
+            icon: 'error',
+            customClass: {
+            actions: 'my-actions',
+            cancelButton: 'order-1 right-gap',
+            confirmButton: 'order-2',
+            denyButton: 'order-3',
+                }
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                } 
+                })
+
   }
+
 }
 
 quantityInput.addEventListener('input', calculatePrice);
@@ -407,4 +424,25 @@ quantityInput.addEventListener('input', calculatePrice);
 </body>
 
 </html>
+<?php
+    if($show_message === 0)
+    {
+        
+     
+        ?>
+        <script>
+            console.log('yes').
+            Swal.fire('نحن سعداء بانضمامك الينا , و نهديك تجربتين مجانيتين', 'شكرا', 'success');
+        </script>
+        <?php
+        $servername = "localhost";
+        $username = "souqdev_wajdi";
+        $password = "wajdiwajdi";
+        $dbname = "souqdev_wajdi";
+        // Create connection
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        $sql = "UPDATE users SET show_message = '1' WHERE id= '$user_id'";
+        $result = $conn->query($sql);
+    }
 
+?>

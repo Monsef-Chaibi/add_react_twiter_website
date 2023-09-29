@@ -9,10 +9,20 @@
     $successMessage = ""; // Initialisez la variable de message de succès
     $errorMessage = ""; // Initialisez la variable de message de danger
 
+
+    $rand=rand(9999,1000);
+
+    
     if (isset($_POST["submit"])){
         $user = $_POST["user"];
         $email = $_POST["email"];
         $pass = $_POST["pass"];
+        $check = $_POST["check"];
+        $check_nb = $_POST["check_nb"];
+        if($check===$check_nb)
+        {
+
+        
         /*
         
         $servername = "localhost";
@@ -49,10 +59,12 @@
             $errorMessage = "حدث خطأ أثناء إضافة المستخدم"; // Erreur
         }
       }
-          }
+        }  }
     }
-
-    mysqli_close($con);
+    else
+    {
+      $errorMessage = "رمز التحقق غير صحيح";
+    }
   }
  
 ?>
@@ -250,6 +262,16 @@ button:hover {
             <input placeholder="كلمة المرور" id="pass" class="inputField" type="password" name="pass" required
               style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
           </div>
+          <div class="inputContainer" >
+            <svg viewBox="0 0 16 16" fill="#2e2e2e" height="16" width="16" xmlns="http://www.w3.org/2000/svg"
+              class="inputIcon">
+              <path d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+            </svg>
+            <input style="width:60%;margin-right:2%" placeholder="ادخل رمز التحقق" id="pass" class="inputField" type="text" name="check" required
+              style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+              <input style="width:40%;height: 30px; margin-top:6%;border: 2px solid #8000ff; text-align:center;font-family: cursive;" value="<?php echo $rand ?>" disabled type="text">
+              <input type="hidden" name="check_nb" value="<?php echo $rand ?>">
+            </div>
           <button id="button" type="submit" name="submit"
             style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">تسجيل</button>
           <div class="signupContainer">
@@ -275,64 +297,5 @@ button:hover {
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 
-
-  <script>
-      
-      document.addEventListener("DOMContentLoaded", function () {
-    const overlay = document.getElementById("overlay");
-    const modal = document.querySelector(".modal");
-    const close = document.getElementById("close");
-    const randomNumberSpan = document.getElementById("randomNumber");
-    const userInput = document.getElementById("userInput");
-    const verifyButton = document.getElementById("verifyButton");
-    const verificationResult = document.getElementById("verificationResult");
-
-    function generateRandomNumber() {
-        return Math.floor(Math.random() * 10000);
-    }
-
-    function openModal() {
-        const randomNum = generateRandomNumber();
-        randomNumberSpan.textContent = randomNum;
-        userInput.value = "";
-        verificationResult.textContent = "";
-        overlay.style.display = "flex";
-    }
-
-    function closeModal() {
-        overlay.style.display = "none";
-    }
-
-    function verifyRandomNumber() {
-        const enteredValue = userInput.value;
-        const randomNum = randomNumberSpan.textContent;
-
-        if (enteredValue === randomNum) {
-            verificationResult.textContent = "تم التحقق من أنك بشري";
-            verificationResult.style.color = "green";
-            <?php 
-              $_SESSION["Humans"] = true ;
-            ?>
-        } else {
-            verificationResult.textContent = "تعذر التحقق";
-            verificationResult.style.color = "red";
-        }
-
-        setTimeout(closeModal, 3000);
-    }
-
-    
-    verifyButton.addEventListener("click", verifyRandomNumber);
-
-    <?php
-      if($_SESSION["Humans"] === false) {
-    ?>
-    openModal();
-    <?php } ?>
-});
-
-   
-
-    </script>
 </body>
 </html>

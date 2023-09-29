@@ -44,9 +44,14 @@ if ($mysqli->affected_rows) {
 
     END;
 
-    try {
+  
+   
 
-        $mail->send();
+    try {
+      if($mail->send()){
+        $successMessage = "تم ارسال الرابط "; //  affichez un message 
+        
+      }
 
     } catch (Exception $e) {
 
@@ -57,7 +62,7 @@ if ($mysqli->affected_rows) {
 
 }
 
-    $successMessage = "تم ارسال الرابط "; //  affichez un message 
+    
 
        
     } 
